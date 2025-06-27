@@ -20,7 +20,10 @@ os.makedirs(DATA_DIR, exist_ok=True)
 def load_events():
     if os.path.exists(EVENTS_FILE):
         with open(EVENTS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            data = json.load(f)
+            # กรองเอาเฉพาะ dict ที่มี key name, start, end
+            events = [e for e in data if isinstance(e, dict) and 'name' in e and 'start' in e and 'end' in e]
+            return events
     return []
 
 def save_events(events):
