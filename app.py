@@ -228,7 +228,7 @@ def register_event(event):
             full_name = f"{user.get('Prefix', '')} {user.get('FirstName', '')} {user.get('LastName', '')}".strip()
             new_entry = pd.DataFrame([{
                 'StudentID': sid,
-                'Name': full_name,
+                'Name': f"{user.get('FirstName', '')} {user.get('LastName', '')}".strip(),
                 'Email': user.get('Email', ''),
                 'Position': user.get('Position', ''),
                 'Time': time_str
