@@ -26,47 +26,13 @@
 {% include 'navbar.html' %}
 <div class="container mt-5">
     <h3>ยืนยันการลงทะเบียนกิจกรรม: <strong>{{ event }}</strong></h3>
-    <p>ช่วงเวลา: {{ start }} - {{ end }}</p>
-    <p>ชื่อ: {{ user.Prefix }} {{ user.FirstName }} {{ user.LastName }}</p>
-    <p>อีเมล: {{ user.Email }}</p>
-    <p>ตำแหน่ง: {{ user.Position }}</p>
-
+        <p>ชื่อ: {{ user['Prefix'] }} {{ user['FirstName'] }} {{ user['LastName'] }}</p>
+        <p>อีเมล: {{ user['Email'] }}</p>
+        <p>ตำแหน่ง: {{ user['Position'] }}</p>
     <form id="registerForm" method="POST" action="">
         <button type="submit" class="btn btn-primary">ยืนยันลงทะเบียน</button>
         <a href="/" class="btn btn-secondary">ยกเลิก</a>
     </form>
 </div>
-
-<script>
-document.getElementById('registerForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // ป้องกันการ submit แบบปกติ
-
-    fetch('', {  // ส่ง POST ไปที่ URL ปัจจุบัน
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({})
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(data => {throw data});
-        }
-        return response.json();
-    })
-    .then(data => {
-        alert(data.message);
-        if (data.status === 'success') {
-            window.location.href = '/activity';  // เปลี่ยนไปหน้ารายการกิจกรรมของผู้ใช้
-        }
-    })
-    .catch(err => {
-        alert(err.message || 'เกิดข้อผิดพลาด');
-    });
-});
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

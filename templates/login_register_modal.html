@@ -52,29 +52,32 @@
 </div>
 
 <script>
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-  const toggleForm = document.getElementById('toggleForm');
-  const toggleText = document.getElementById('toggleText');
-  const modalTitle = document.getElementById('authModalLabel');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const toggleText = document.getElementById('toggleText');
+const modalTitle = document.getElementById('authModalLabel');
 
-  let isLogin = true;
+let isLogin = true;
 
-  toggleForm.addEventListener('click', function (e) {
-    e.preventDefault();
-    isLogin = !isLogin;
+function toggleForms(e) {
+  if (e) e.preventDefault();
+  isLogin = !isLogin;
 
-    loginForm.classList.toggle('d-none');
-    registerForm.classList.toggle('d-none');
+  loginForm.classList.toggle('d-none');
+  registerForm.classList.toggle('d-none');
 
-    modalTitle.textContent = isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก';
+  modalTitle.textContent = isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก';
 
-    toggleText.innerHTML = isLogin
-      ? 'ยังไม่มีบัญชี? <a href="#" id="toggleForm">สมัครสมาชิก</a>'
-      : 'มีบัญชีอยู่แล้ว? <a href="#" id="toggleForm">เข้าสู่ระบบ</a>';
+  toggleText.innerHTML = isLogin
+    ? 'ยังไม่มีบัญชี? <a href="#" id="toggleForm">สมัครสมาชิก</a>'
+    : 'มีบัญชีอยู่แล้ว? <a href="#" id="toggleForm">เข้าสู่ระบบ</a>';
 
-    // ⚠️ ต้อง re-bind toggleForm เพราะ DOM element ใหม่ถูกสร้างทุกครั้ง
-    document.getElementById('toggleForm').addEventListener('click', arguments.callee);
-  });
+  // ผูก event listener ใหม่ทุกครั้งที่เปลี่ยนข้อความ
+  document.getElementById('toggleForm').addEventListener('click', toggleForms);
+}
+
+// ผูก event ครั้งแรก
+document.getElementById('toggleForm').addEventListener('click', toggleForms);
+
 </script>
 

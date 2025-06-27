@@ -23,37 +23,55 @@
     </style>
 </head>
 <body>
-{% include 'navbar.html' %}
-<div class="container bg-white p-4 rounded shadow-sm">
-    <h1 class="text-center mb-4">Dashboard Admin</h1>
-    <!-- เลือกกิจกรรมเพื่อกรอง -->
-    <form method="GET" action="/dashboard" class="mb-3">
-        <label for="event-select" class="form-label">เลือกกิจกรรม:</label>
-        <select name="event" id="event-select" class="form-select w-50 d-inline-block" onchange="this.form.submit()">
-            <option value="">-- แสดงทุกกิจกรรม --</option>
-            {% for ev in event_list %}
-            <option value="{{ ev }}" {% if ev == selected_event %}selected{% endif %}>{{ ev }}</option>
-            {% endfor %}
-        </select>
-    </form>
-    <!-- ฟอร์มเพิ่มกิจกรรม -->
-    <form method="POST" action="/dashboard/add_event" class="mb-4">
-        <label class="form-label">เพิ่มกิจกรรมใหม่:</label>
-        <div class="row g-2">
-            <div class="col-md-3">
-                <input type="text" name="new_event" placeholder="ชื่อกิจกรรม" class="form-control" required>
+    {% include 'navbar.html' %}
+    <div class="container bg-white p-4 rounded shadow-sm">
+        <h1 class="text-center mb-4">Dashboard Admin</h1>
+
+        <!-- แสดง flash message -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div>
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- เลือกกิจกรรมเพื่อกรอง -->
+        <form method="GET" action="{{ url_for('dashboard') }}" class="mb-3">
+            <label for="event-select" class="form-label">เลือกกิจกรรม:</label>
+            <select name="event" id="event-select" class="form-select w-50 d-inline-block" onchange="this.form.submit()">
+                <option value="">-- แสดงทุกกิจกรรม --</option>
+                {% for ev in event_names %}
+                <option value="{{ ev }}" {% if ev == selected_event %}selected{% endif %}>{{ ev }}</option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <!-- ฟอร์มเพิ่มกิจกรรม -->
+        <form method="POST" action="{{ url_for('dashboard') }}" class="mb-4">
+            <label class="form-label">เพิ่มกิจกรรมใหม่:</label>
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <input type="text" name="new_event" placeholder="ชื่อกิจกรรม" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="datetime-local" name="start" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="datetime-local" name="end" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-success w-100">เพิ่ม</button>
+                </div>
             </div>
-            <div class="col-md-3">
-                <input type="datetime-local" name="start" class="form-control" required>
-            </div>
-            <div class="col-md-3">
-                <input type="datetime-local" name="end" class="form-control" required>
-            </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-success w-100">เพิ่ม</button>
-            </div>
-        </div>
-    </form>
+        </form>
+
+        <!-- แสดงรายการกิจกรรมและผู้เข้าร่วม -->
         {% for event, participants in events.items() %}
             {% set event_info = event_list | selectattr('name', 'equalto', event) | list | first %}
             <div class="mb-3 p-3 border rounded bg-light">
@@ -73,7 +91,7 @@
                         <a href="{{ url_for('download', event=event, format='csv') }}" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-filetype-csv"></i> ดาวน์โหลด CSV
                         </a>
-                        <form method="POST" action="/dashboard/delete_event" class="d-inline">
+                        <form method="POST" action="{{ url_for('delete_event') }}" class="d-inline">
                             <input type="hidden" name="delete_event" value="{{ event }}">
                             <button type="submit" class="btn btn-danger btn-sm">
                                 <i class="bi bi-trash"></i> ลบกิจกรรมนี้
@@ -81,9 +99,9 @@
                         </form>
                     </div>
                 </div>
-        
+
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
+                    <table class="table table-bordered table-striped text-nowrap">
                         <thead>
                             <tr>
                                 <th>รหัสนักศึกษา</th>
@@ -95,77 +113,80 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for p in participants %}
-                            <tr>
-                                <td>{{ p.StudentID }}</td>
-                                <td>{{ p.Name }}</td>
-                                <td>{{ p.Email }}</td>
-                                <td>{{ p.Position }}</td>
-                                <td>{{ p.Time }}</td>
-                                <td>
-                                    <form method="POST" action="/dashboard/remove_participant">
-                                        <input type="hidden" name="event_name" value="{{ event }}">
-                                        <input type="hidden" name="student_id" value="{{ p.StudentID }}">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">ลบ</button>
-                                    </form>
-                                </td>
-                            </tr>
+                            {% if participants %}
+                                {% for p in participants %}
+                                <tr>
+                                    <td>{{ p['StudentID'] }}</td>
+                                    <td>{{ p['Name'] }}</td>
+                                    <td>{{ p['Email'] }}</td>
+                                    <td>{{ p['Position'] }}</td>
+                                    <td>{{ p['Time'] }}</td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('remove_participant') }}">
+                                            <input type="hidden" name="event_name" value="{{ event }}">
+                                            <input type="hidden" name="student_id" value="{{ p['StudentID'] }}">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">ลบ</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
                             {% else %}
-                            <tr><td colspan="6" class="text-center">ไม่มีผู้เข้าร่วม</td></tr>
-                            {% endfor %}
+                                <tr><td colspan="6" class="text-center">ไม่มีผู้เข้าร่วม</td></tr>
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>
             </div>
         {% endfor %}
-    <hr>
 
-    <h3>รายชื่อผู้ใช้ทั้งหมดในระบบ</h3>
+        <hr>
 
-    {% if selected_event %}
-        {% set total_users = users|length %}
-        {% set registered_count = registered_ids|length %}
-        {% set not_registered_count = total_users - registered_count %}
-        <p>กิจกรรม: <strong>{{ selected_event }}</strong></p>
-        <p>จำนวนผู้ลงทะเบียน: {{ registered_count }} คน</p>
-        <p>จำนวนผู้ยังไม่ลงทะเบียน: {{ not_registered_count }} คน</p>
+        <h3>รายชื่อผู้ใช้ทั้งหมดในระบบ</h3>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover mt-3">
-                <thead>
-                    <tr>
-                        <th>รหัสนักศึกษา</th>
-                        <th>ชื่อ</th>
-                        <th>อีเมล</th>
-                        <th>ตำแหน่ง</th>
-                        <th>สถานะการลงทะเบียน</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for sid, user in users.items() %}
-                        {% set is_registered = (sid in registered_ids) %}
+        {% if selected_event %}
+            {% set total_users = users|length %}
+            {% set registered_count = registered_ids|length %}
+            {% set not_registered_count = total_users - registered_count %}
+            <p>กิจกรรม: <strong>{{ selected_event }}</strong></p>
+            <p>จำนวนผู้ลงทะเบียน: {{ registered_count }} คน</p>
+            <p>จำนวนผู้ยังไม่ลงทะเบียน: {{ not_registered_count }} คน</p>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover text-nowrap mt-3">
+                    <thead>
                         <tr>
-                            <td>{{ sid }}</td>
-                            <td>{{ user.Prefix }} {{ user.FirstName }} {{ user.LastName }}</td>
-                            <td>{{ user.Email }}</td>
-                            <td>{{ user.Position }}</td>
-                            <td>
-                                {% if is_registered %}
-                                    <span class="badge bg-success">ลงทะเบียนแล้ว</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">ยังไม่ลงทะเบียน</span>
-                                {% endif %}
-                            </td>
+                            <th>รหัสนักศึกษา</th>
+                            <th>ชื่อ</th>
+                            <th>อีเมล</th>
+                            <th>ตำแหน่ง</th>
+                            <th>สถานะการลงทะเบียน</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <p class="text-muted">กรุณาเลือกกิจกรรมเพื่อดูสถานะการลงทะเบียน</p>
-    {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for sid, user in users.items() %}
+                            {% set is_registered = (sid in registered_ids) %}
+                            <tr>
+                                <td>{{ sid }}</td>
+                                <td>{{ user['Prefix'] }} {{ user['FirstName'] }} {{ user['LastName'] }}</td>
+                                <td>{{ user['Email'] }}</td>
+                                <td>{{ user['Position'] }}</td>
+                                <td>
+                                    {% if is_registered %}
+                                        <span class="badge bg-success">ลงทะเบียนแล้ว</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">ยังไม่ลงทะเบียน</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">กรุณาเลือกกิจกรรมเพื่อดูสถานะการลงทะเบียน</p>
+        {% endif %}
+    </div>
 
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
