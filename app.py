@@ -202,22 +202,30 @@ def download_file(event, file_format):
 
 @app.route('/register/<event>', methods=['GET', 'POST'])
 def register_event(event):
-    if 'user' not in session:
+    if 'user' not in session or 'student_id' not in session:
         return redirect('/login')
 
-    user = session['user']
     sid = session['student_id']
+
+    # โหลด users.json
+    users = load_users()
+    user = users.get(str(sid))  # ดึงข้อมูลจาก users.json ตาม sid
+
+    if not user:
+        flash('ไม่พบข้อมูลผู้ใช้ในระบบ', 'danger')
+        return redirect('/login')
 
     if request.method == 'POST':
         path = os.path.join(DATA_DIR, f'{event}.xlsx')
-        df = pd.read_excel(path) if os.path.exists(path) else pd.DataFrame(columns=['StudentID','Name','Email','Position','Time'])
+        df = pd.read_excel(path) if os.path.exists(path) else pd.DataFrame(
+            columns=['StudentID', 'Name', 'Email', 'Position', 'Time'])
 
         if str(sid) in df['StudentID'].astype(str).values:
             flash('คุณได้ลงทะเบียนกิจกรรมนี้แล้ว', 'warning')
         else:
             now = datetime.now(zoneinfo.ZoneInfo('Asia/Bangkok'))
             time_str = now.strftime('%Y-%m-%d %H:%M:%S')
-            full_name = f"{user.get('Prefix','')} {user.get('FirstName','')} {user.get('LastName','')}".strip()
+            full_name = f"{user.get('Prefix', '')} {user.get('FirstName', '')} {user.get('LastName', '')}".strip()
             new_entry = pd.DataFrame([{
                 'StudentID': sid,
                 'Name': full_name,
@@ -232,6 +240,7 @@ def register_event(event):
         return redirect('/activity')
 
     return render_template('confirm_register.html', event=event, user=user)
+
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
