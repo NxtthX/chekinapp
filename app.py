@@ -30,6 +30,9 @@ def save_events(events):
     with open(EVENTS_FILE, 'w', encoding='utf-8') as f:
         json.dump(events, f, indent=2, ensure_ascii=False)
 
+def clean_events(events):
+    return [e for e in events if isinstance(e, dict) and 'name' in e and 'start' in e and 'end' in e]
+    
 def load_users():
     if os.path.exists(USER_FILE):
         with open(USER_FILE, 'r', encoding='utf-8') as f:
