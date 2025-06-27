@@ -1,1 +1,1 @@
-# chekinapp
+# smo-sci

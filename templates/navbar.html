@@ -1,0 +1,57 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+      <span class="navbar-brand fw-bold">
+        <i class="bi bi-stars"></i> ระบบกิจกรรม
+      </span>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+        {% if session.get('user') %}
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link {% if active_page=='index' %}active{% endif %}" href="/">หน้าหลัก</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if active_page=='profile' %}active{% endif %}" href="/profile">Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if active_page=='activity' %}active{% endif %}" href="/activity">Activity</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('calendar') }}">ปฏิทินกิจกรรม</a>
+          </li>
+          {% if session['user'].get('is_admin') %}
+          <li class="nav-item">
+            <a class="nav-link {% if active_page=='admin' %}active{% endif %}" href="/dashboard">Dashboard</a>
+          </li>
+          {% endif %}
+        </ul>
+
+        <ul class="navbar-nav">
+          <li class="nav-item d-flex align-items-center text-white px-2">
+            สวัสดี, <span class="fw-semibold ms-1">{{ session['user']['name'] }}</span>
+          </li>
+          <li class="nav-item">
+            <a href="/logout" class="btn btn-outline-light btn-sm ms-2">ออกจากระบบ</a>
+          </li>
+        </ul>
+        {% else %}
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a href="#" class="nav-link {% if active_page=='home' %}active{% endif %}" data-bs-toggle="modal" data-bs-target="#authModal">เข้าสู่ระบบ / สมัครสมาชิก</a>
+          </li>
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+</nav>
