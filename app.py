@@ -399,21 +399,21 @@ def add_event():
             flash('กรุณากรอกข้อมูลให้ครบถ้วน', 'danger')
             return redirect(url_for('add_event'))
 
-        events = load_events()
-
-        # ตรวจสอบว่าชื่อกิจกรรมซ้ำหรือไม่
-        if any(e.get('name') == event_name for e in events if isinstance(e, dict)):
-            flash('มีกิจกรรมชื่อนี้แล้วในระบบ', 'warning')
-            return redirect(url_for('add_event'))
-
-        # เพิ่มกิจกรรมใหม่
-        new_event = {
-            'name': event_name,
-            'start': start,
-            'end': end
-        }
-        events.append(new_event)
-        save_events(events)
+            events = load_events()
+            events = clean_events(events)  # กรองก่อน append
+            
+            # ตรวจสอบซ้ำเหมือนเดิม
+            if any(e.get('name') == event_name for e in events):
+                flash('มีกิจกรรมชื่อนี้แล้วในระบบ', 'warning')
+                return redirect(url_for('dashboard'))
+            
+            new_event = {
+                'name': event_name,
+                'start': start,
+                'end': end
+            }
+            events.append(new_event)
+            save_events(events)
 
         flash('เพิ่มกิจกรรมเรียบร้อยแล้ว', 'success')
         return redirect(url_for('dashboard'))
